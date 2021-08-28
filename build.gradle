@@ -2,20 +2,23 @@ buildscript {
     repositories {
         mavenCentral()
         maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
+            name = "gt"
+            url = "https://gregtech.overminddl1.com/"
         }
         maven {
             name = "sonatype"
             url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
+        maven {
+            url = "https://jitpack.io"
+        }
     }
     dependencies {
-        //classpath 'net.minecraftforge.gradle:ForgeGradle:1.1-SNAPSHOT'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'com.github.GTNH2:ForgeGradle:FG_1.2-SNAPSHOT'
     }
 }
 
+apply plugin: 'scala'
 apply plugin: 'forge'
 
 //include "config.gradle"
@@ -25,20 +28,14 @@ apply plugin: 'forge'
 archivesBaseName = jarName
 
 minecraft {
-    //version = "1.7.2-10.12.0.1046"
-    version = "1.7.10-10.13.0.1208"
-    assetDir = "eclipse/assets"
+    version = "1.7.10-10.13.4.1614-1.7.10"
 }
 
 sourceSets.main {
 	compileClasspath += files("lib")
-	java.srcDirs "src/base", "src/mod"
+	scala.srcDirs "src/base", "src/mod"
 	resources.srcDirs "src/resources"
 }
-
-//jar {
-//	exclude "ic2"
-//}
 
 processResources {
     // replace stuff in mcmod.info, nothing else
@@ -52,5 +49,43 @@ processResources {
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
+    }
+}
+
+repositories {
+	maven { url = "https://chickenbones.net/maven/" }
+	maven { url = "https://files.projectredwiki.com/maven" }
+}
+
+dependencies {
+    compile("mrtjp:ProjectRed:1.7.10-4.7.0pre12.95:dev") {
+        exclude group: "tconstruct"
+        exclude group: "cofh"
+    }
+    compile "codechicken:ForgeMultipart:1.7.10-1.2.0.347:dev"
+}
+
+task deobfJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = 'deobf'
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives deobfJar
+    archives sourceJar
+}
+
+install.dependsOn reobf
+
+idea {
+    module {
+        inheritOutputDirs = false
+        outputDir = new File(compileJava.destinationDir.parentFile.parentFile, "idea")
+        testOutputDir = new File(compileTestJava.destinationDir.parentFile.parentFile, "ideaTest")
     }
 }
