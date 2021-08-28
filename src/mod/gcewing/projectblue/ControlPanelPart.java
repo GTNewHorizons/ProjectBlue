@@ -135,12 +135,12 @@ public class ControlPanelPart extends PBFacePart /*JCuboidFacePart*/
 	public Cuboid6 getBounds() {
 		return bounds[side];
 	}
-	
+
 //	@Override
 //	public Iterable<IndexedCuboid6> getSubParts() {
 //		return subParts[side];
 //	}
-	
+
 //	@Override
 //	public int getSlotMask() {
 //		return 1 << side;
@@ -279,11 +279,7 @@ public class ControlPanelPart extends PBFacePart /*JCuboidFacePart*/
 	
 	@Override
 	public void click(EntityPlayer player, MovingObjectPosition hit, ItemStack stack) {
-		System.out.printf("ControlPanelPart.click: remote = %s with %s\n",
-			world().isRemote, stack);
-		if (!world().isRemote && player.isSneaking() && stack.getItem() instanceof ItemScrewdriver) {
-			//tile().dropItems(getDrops());
-			//tile().remPart(this);
+		if (!world().isRemote && player.isSneaking() && stack != null && stack.getItem() instanceof ItemScrewdriver) {
 			harvest(hit, player);
 		}
 	}
@@ -381,7 +377,6 @@ public class ControlPanelPart extends PBFacePart /*JCuboidFacePart*/
 	}
 	
 	void changeRotation() {
-		System.out.printf("ControlPanelPart.changeRotation\n");
 		rot = (rot + 1) & 0x3;
 		changed();
 	}
