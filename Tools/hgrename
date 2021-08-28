@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+#
+#   Analyse the output from 'hg status' and generate
+#   'hg rename --after' commands to regain control of moved files.
+#
+
+import os, sys
+
+status = 0
+npath = 2 # Number of trailing pathname components to use to find matching files
+old = {} # Filename --> old directory
+dup = set()
+
+def error(mess):
+	global status
+	sys.stderr.write(mess + "\n")
+	status = 1
+
+def joinpath(components):
+	if components:
+		return os.path.join(*components)
+	else:
+		return "."
+
+def splitpath(path, n):
+	components = path.split(os.sep)
+	dir = joinpath(components[:-n])
+	name = joinpath(components[-n:])
+	#print "splitpath:", path, "-->", repr(dir), repr(name) ###
+	return dir, name
+
+def main():
+	f = sys.stdin
+	g = sys.stdout
+	for line in f:
+		code, path = line.split()
+		dir, name = splitpath(path, npath)
+		if code == "!":
+			if name not in old:
+				old[name] = dir
+			else:
+				dup.add(name)
+				error("Duplicate filename: %s in %s and %s" % (name, dir, old[name]))
+		elif code == "?":
+			if name in old and name not in dup:
+				g.write("hg rename --after %s %s\n" % (
+					os.path.join(old[name], name), path))
+	sys.exit(status)
+
+main()

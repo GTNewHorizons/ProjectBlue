@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+#------------------------------------------------------------------------------
+#
+#   Add files to zip archive under specified directory names
+#
+#   Usage: xzip [option...] zipfile [-in dirname filename...]...
+#
+#   Options:
+#      -a       Append to zipfile (default is to create new file)
+#
+#------------------------------------------------------------------------------
+
+import os, sys
+from zipfile import ZipFile
+
+def add_file(zip, arcdir, path):
+	filename = os.path.basename(path)
+	arcpath = os.path.join(arcdir, filename)
+	print "Adding", path, "as", arcpath
+	zip.write(path, arcpath)
+
+def add_dir(zip, arcdir, top):
+	for name in os.listdir(top):
+		if not name.startswith("."):
+			path = os.path.join(top, name)
+			if os.path.isdir(path):
+				add_dir(zip, os.path.join(arcdir, name), path)
+			else:
+				add_file(zip, arcdir, path)
+
+def add_entry(zip, arcdir, arg):
+	if os.path.isdir(arg):
+		add_dir(zip, arcdir, arg)
+	else:
+		add_file(zip, arcdir, arg)
+
+def fatal(mess):
+	sys.stdout.write("%s: %s\n" % (sys.argv[0], mess))
+	sys.exit(1)
+
+def main():
+	mode = "w"
+	arcdir = ""
+	args = sys.argv[1:]
+	while args[0].startswith("-"):
+		arg = args.pop(0)
+		if arg == "-a":
+			mode = "a"
+		else:
+			fatal("Unknown option %s" % arg)
+	iargs = iter(args)
+	try:
+		zippath = iargs.next()
+		zip = ZipFile(zippath, mode)
+		for arg in iargs:
+			if arg == "-in":
+				arcdir = iargs.next()
+			else:
+				add_entry(zip, arcdir, arg)
+		zip.close()
+	except StopIteration:
+		fatal("Too few arguments")
+
+main()

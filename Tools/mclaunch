@@ -1,0 +1,179 @@
+#!/usr/local/bin/python
+#--------------------------------------------------------------------------
+#
+#   Minecraft Launcher
+#
+#--------------------------------------------------------------------------
+
+import os, sys
+
+appsupport_dir = "/Users/greg/Library/Application Support/minecraft"
+default_username = "gcewing"
+
+# Pre 1.6
+mcdirect_app = "/Local/Games/Minecraft/Minecraft-Direct.app"
+mc_exe = os.path.join(mcdirect_app, "Contents/MacOS/JavaApplicationStub")
+mc_launch_args = [mc_exe]
+
+def mcpath(*args):
+	return os.path.join(appsupport_dir, *args)
+
+#mc_assets = mcpath("assets") # pre 1.7
+#mc_assets = mcpath("assets/virtual/legacy")
+mc_assets_root = mcpath("assets")
+
+overrides = {}
+
+def subdir_of(path):
+	names = [name for name in os.listdir(path) if not name.startswith(".")]
+	print "Versions in profile:", names
+	if len(names) == 1:
+		return names[0]
+
+def read_json(path):
+	return eval(open(path).read().replace("true", "True").replace("false", "False"))
+
+def find_jars(dir):
+	result = []
+	for (path, dirs, names) in os.walk(dir):
+		for name in dirs + names:
+			if name.endswith(".jar"):
+				result.append(os.path.join(path, name))
+	return result
+
+def find_libraries(version_json, dir):
+	#print "mclaunch: find_libraries in %s" % dir ###
+	result = []
+	for lib in version_json['libraries']:
+		name = lib['name']
+		pkg, tag, ver = name.split(":")
+		relpath = "{0}/{1}/{2}/{1}-{2}.jar".format(pkg.replace(".", "/"), tag, ver)
+		jar = os.path.join(dir, relpath)
+		#print "mclaunch: find_libraries: %s -> %s" % (name, jar) ###
+		result.append(jar)
+	return result
+
+def old_launch_args(user):
+	#os.chdir(profile_dir)
+	jars = find_jars(mcpath("bin"))
+	return ["java", "-Xincgc", "-Xms1024M", "-Xmx1024M",
+			"-cp", ":".join(jars),
+			"-Djava.library.path=" + mcpath("bin/natives"),
+			"net.minecraft.client.Minecraft",
+			user]
+
+def add_profile_args(args, **vars):
+	print "add_profile_args: vars = %r" % vars ###
+	version = vars["version_name"]
+	print "add_profile_args: version_name = %r" % version ###
+	json_path = mcpath("versions/{0}/{0}.json".format(version))
+	json = read_json(json_path)
+	print "add_profile_args: Version json:", json ###
+	args.append(json["mainClass"])
+	ma = iter(json["minecraftArguments"].split())
+	for word in ma:
+		if word == "--session":
+			ma.next()
+		else:
+			if word.startswith("$"):
+				word = vars.get(word[2:-1], "unknown")
+			args.append(word)
+	return args
+
+def new_launch_args(launcher_profile_name, user):
+	json = read_json(mcpath("launcher_profiles.json"))
+	#print "Launcher json:", json ###
+	if not launcher_profile_name:
+		launcher_profile_name = json.get("selectedProfile")
+	if not launcher_profile_name:
+		raise EnvironmentError("No profile selected in launcher")
+	#version = version or subdir_of(mcpath("versions")) #or prefix_of(profile_name)
+	pf = json["profiles"].get(launcher_profile_name)
+	if not pf:
+		raise EnvironmentError("Profile not found: %s" % launcher_profile_name)
+	version = pf.get("lastVersionId")
+	if not version:
+		raise EnvironmentError("Profile does not specify version: %s" % launcher_profile_name)
+	game_dir = overrides.get("gameDir") or pf.get("gameDir", appsupport_dir)
+	natives = mcpath("natives")
+	#jars = find_jars(mcpath("libraries"))
+	version_json = read_json(mcpath("versions", version, version + ".json"))
+	jars = find_libraries(version_json, mcpath("libraries"))
+	jars.append(mcpath("versions", version, version + ".jar"))
+	args = ["java",
+		#"-Xdock:icon=" + os.path.join(mc_assets, "icons/minecraft.icns"),
+		"-Xdock:name=Minecraft",
+		"-Xmx1G",
+		"-XX:MaxPermSize=128m",
+		"-Djava.library.path=" + natives,
+		"-cp", ":".join(jars),
+		#"net.minecraft.client.main.Main",
+		#"--username", user,
+		#"--version", version,
+		#"--gameDir", appsupport_dir,
+		#"--assetsDir", mc_assets
+	]
+	add_profile_args(args,
+		auth_player_name = user, version_name = version, game_directory = game_dir,
+		#game_assets = mc_assets,
+		assets_root = mc_assets_root,
+		assets_index_name = version_json.get('assets', 'unknown_assets_index_name'),
+		user_properties = "{}")
+	return args
+
+def launch_args(launcher_profile_name, user):
+	print "mclaunch.launch_args:", repr(launcher_profile_name), repr(user) ###
+	user = user or default_username
+	if not os.path.exists(mc_assets_root):
+		return old_launch_args(user)
+	else:
+		return new_launch_args(launcher_profile_name, user)
+
+def switch_to_profile(profile_path):
+	if profile_path != appsupport_dir:
+		try:
+			os.unlink(appsupport_dir)
+		except EnvironmentError:
+			pass
+		os.symlink(profile_path, appsupport_dir)
+
+def spawn(launcher_profile_name = None, user = None):
+	print "mclaunch.spawn:", repr(launcher_profile_name), repr(user) ###
+	args = launch_args(launcher_profile_name, user)
+	print "Spawning:", args ###
+	os.spawnvp(os.P_NOWAIT, args[0], args)
+
+def execute(launcher_profile_name = None, user = None):
+	args = launch_args(launcher_profile_name, user)
+	print "Executing:", args ###
+	os.execvp(args[0], args)
+
+def fatal(mess):
+	sys.stderr.write("%s\n" % mess)
+	sys.exit(1)
+
+def main():
+	args = sys.argv[1:]
+	def poparg(i = 0):
+		if args:
+			return args.pop(i)
+	def popopt(s):
+		try:
+			i = args.index(s)
+		except ValueError:
+			return None
+		del args[i]
+		return poparg(i)
+	#version = popopt("-v")
+	launcher_profile_name = popopt("-p")
+	user = popopt("-u")
+	overrides["gameDir"] = popopt("--gameDir")
+	profile_dir = poparg() or appsupport_dir
+	try:
+		switch_to_profile(profile_dir)
+		execute(launcher_profile_name, user)
+	except EnvironmentError as e:
+		fatal(str(e))
+
+if __name__ == "__main__":
+	main()

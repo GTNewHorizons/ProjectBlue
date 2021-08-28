@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+#
+#   Analyse the output from 'hg status' and generate
+#   'hg rename --after' and 'hg remove --after' commands.
+#
+#    Usage:
+#
+#       hg status | hgafter [otions] | sh
+#
+#    Options:
+#
+#       -n number
+#           Number of trailing pathame components to use for
+#           determining renamed files (default 1)
+#
+
+import os, sys
+
+status = 0
+npath = 1 # Number of trailing pathname components to use to find matching files
+old = {} # Filename --> old directory
+dup = set()
+
+def error(mess):
+    global status
+    sys.stderr.write(mess + "\n")
+    status = 1
+
+def joinpath(components):
+    if components:
+        return os.path.join(*components)
+    else:
+        return "."
+
+def splitpath(path, n):
+    components = path.split(os.sep)
+    dir = joinpath(components[:-n])
+    name = joinpath(components[-n:])
+    #print "splitpath:", path, "-->", repr(dir), repr(name) ###
+    return dir, name
+
+def main():
+    args = sys.argv[1:]
+    if args and args[0] == "-n":
+        global npath
+        npath = int(args[1])
+    f = sys.stdin
+    g = sys.stdout
+    for line in f:
+        code, path = line.split()
+        dir, name = splitpath(path, npath)
+        if code == "!":
+            if name not in old:
+                old[name] = dir
+            else:
+                dup.add(name)
+                error("Duplicate filename: %s in %s and %s" % (name, dir, old[name]))
+        elif code == "?":
+            if name in old and name not in dup:
+                g.write("hg rename --after %s %s\n" % (
+                    os.path.join(old[name], name), path))
+                del old[name]
+    for name in old:
+        if name not in dup:
+            g.write("hg remove --after %s\n" % os.path.join(old[name], name))
+    sys.exit(status)
+
+main()

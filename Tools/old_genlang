@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+#-------------------------------------------------------------------------------
+#
+#   Generate language file
+#
+#-------------------------------------------------------------------------------
+
+usage = "Usage: genlang modid modpackage srcfile"
+
+def fail(s):
+	sys.stderr.write(s + "\n")
+	sys.exit(1)
+
+def badusage(s):
+	fail(usage)
+
+import os, sys
+
+def main():
+	args = sys.argv[1:]
+	if len(args) != 3:
+		badusage()
+	modid = args[0]
+	modpackage = args[1]
+	srcpath = args[2]
+	modkey = modid.lower()
+	assetkey = modpackage.lower().replace(".", "_")
+	dstdir = os.path.join("src", "resources", "assets", modkey, "lang")
+	dstpath = os.path.join(dstdir, "en_US.lang")
+	if os.path.exists(srcpath):
+		f = open(srcpath)
+		if not os.path.exists(dstdir):
+			os.makedirs(dstdir)
+		g = open(dstpath, "w")
+		prefix = ""
+		for line in f:
+			line = line.strip()
+			if line and not line.startswith("#"):
+				if line.endswith(":"):
+					prefix = line[:-1].strip()
+					if prefix in ("tile", "item"):
+						suffix = ".name"
+					else:
+						suffix = ""
+				else:
+					name, _, title = line.partition("=")
+					name = name.strip()
+					if "/" in name:
+						parts = name.split("/")
+						key = "%s_%s" % (assetkey, "_".join(parts[:-1]))
+						name = parts[-1]
+					else:
+						key = assetkey
+					g.write("%s.%s:%s%s=%s\n" % (prefix, key, name, suffix, title.strip()))
+		g.close()
+
+main()

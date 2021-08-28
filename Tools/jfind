@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+
+import os, sys
+from os.path import split, splitext
+from glob import glob
+from zipfile import ZipFile
+
+def load_classpath():
+	text = open("classpath.txt").read()
+	return text.split(":")
+
+def filename_matches(filename, name):
+	base, ext = splitext(filename)
+	#print "filename_matches:", base, ext, name
+	return base == name and ext in (".class", ".java")
+
+def make_classname(dir, name):
+	return dir.replace("/", ".") + "." + name
+	
+def find_in_dir(top, name, results):
+	for dir, dirnames, filenames in os.walk(top):
+		for filename in filenames:
+			if filename_matches(filename, name):
+				subdir = dir[len(top)+1:]
+				results.add(make_classname(subdir, name))
+
+def find_in_jar(jar, name, results):
+	if os.path.exists(jar):
+		zip = ZipFile(jar, "r")
+		for path in zip.namelist():
+			path = path.replace("$", "/")
+			dir, filename = split(path)
+			if filename_matches(filename, name):
+				results.add(make_classname(dir, name))
+
+def find_in_jars(entry, name, results):
+	for jar in glob(entry + ".jar"):
+		find_in_jar(jar, name, results)
+
+def find(cp, name, results):
+	for entry in cp:
+		if entry.endswith("*"):
+			find_in_jars(entry, name, results)
+		elif entry.endswith(".jar"):
+			find_in_jar(entry, name, results)
+		else:
+			find_in_dir(entry, name, results)
+
+def main():
+	cp = load_classpath()
+	#print "cp =", cp ###
+	args = sys.argv[1:]
+	results = set()
+	for name in args:
+		find(cp, name, results)
+	for result in results:
+		print "import %s;" % result
+
+main()

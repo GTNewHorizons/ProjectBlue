@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+#--------------------------------------------------------------------------------
+#
+#   Rename override class files in jar from .class to .data
+#
+#   Usage: rename_overrides input_jar output_jar
+#
+#--------------------------------------------------------------------------------
+
+import os, sys
+from zipfile import ZipFile
+
+usage = "Usage: rename_overrides input_jar output_jar"
+
+def process(inpath, outpath):
+	inzip = ZipFile(inpath)
+	outzip = ZipFile(outpath, "w")
+	for entry in inzip.infolist():
+		inname = entry.filename
+		outname = inname
+		if inname.startswith("net/"):
+			#if "$" in inname:
+			#	outname = None
+			#else:
+				outname = inname.replace(".class", ".data")
+		if outname:
+			#print outname
+			data = inzip.read(inname)
+			outzip.writestr(outname, data)
+	outzip.close()
+
+def fatal(mess):
+	sys.stderr.write("%s\n" % mess)
+	sys.exit(1)
+
+def main():
+	args = sys.argv[1:]
+	if len(args) != 2:
+		fatal(usage)
+	process(*args)
+
+main()
