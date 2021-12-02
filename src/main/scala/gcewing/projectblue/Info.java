@@ -6,6 +6,6 @@ public class Info {
 	static final String modName = "Project Blue";
 	static final String modID = "ProjectBlue";
 	//static final String modPackage = "";
-	static final String versionNumber = "1.1.6";
+	static final String versionNumber = "GRADLETOKEN_VERSION";
 	static final String versionBounds = "[1.1,1.2)";
 }
