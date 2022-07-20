@@ -1,5 +1,5 @@
 // Add your dependencies here
 
 dependencies {
-    compile("com.github.GTNewHorizons:ProjectRed:master-SNAPSHOT:dev")
+    compile("com.github.GTNewHorizons:ProjectRed:4.7.7-GTNH:dev")
 }
