@@ -10,6 +10,6 @@ import codechicken.multipart._
 
 abstract class JCenterPart extends TSlottedPart {
 
-	 def getSlotMask:Int = 1 << 6
+  def getSlotMask: Int = 1 << 6
 
 }

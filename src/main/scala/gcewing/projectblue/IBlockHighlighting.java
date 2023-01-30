@@ -1,8 +1,8 @@
-//------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 //
-//   Project Blue - Interface for block placement feedback
+// Project Blue - Interface for block placement feedback
 //
-//------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 
 package gcewing.projectblue;
 
@@ -14,6 +14,6 @@ import net.minecraftforge.client.event.*;
 
 public interface IBlockHighlighting {
 
-	public boolean renderHighlight(DrawBlockHighlightEvent e);
-	
+    public boolean renderHighlight(DrawBlockHighlightEvent e);
+
 }

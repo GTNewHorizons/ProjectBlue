@@ -3,9 +3,10 @@
 package gcewing.projectblue;
 
 public class Info {
-	static final String modName = "Project Blue";
-	static final String modID = "ProjectBlue";
-	//static final String modPackage = "";
-	static final String versionNumber = "GRADLETOKEN_VERSION";
-	static final String versionBounds = "[1.1,1.2)";
+
+    static final String modName = "Project Blue";
+    static final String modID = "ProjectBlue";
+    // static final String modPackage = "";
+    static final String versionNumber = "GRADLETOKEN_VERSION";
+    static final String versionBounds = "[1.1,1.2)";
 }
