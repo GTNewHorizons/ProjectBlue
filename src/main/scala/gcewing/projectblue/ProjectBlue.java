@@ -33,10 +33,9 @@ import cpw.mods.fml.common.registry.*;
 import cpw.mods.fml.relauncher.*;
 
 @Mod(
-        modid = Info.modID,
-        name = Info.modName,
-        version = Info.versionNumber,
-        acceptableRemoteVersions = Info.versionBounds)
+        modid = Info.MODID,
+        name = Info.MODNAME,
+        version = Info.VERSION)
 
 public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
