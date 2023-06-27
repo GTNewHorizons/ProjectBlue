@@ -32,10 +32,7 @@ import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.registry.*;
 import cpw.mods.fml.relauncher.*;
 
-@Mod(
-        modid = Info.MODID,
-        name = Info.MODNAME,
-        version = Info.VERSION)
+@Mod(modid = Info.MODID, name = Info.MODNAME, version = Info.VERSION)
 
 public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 

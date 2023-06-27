@@ -15,8 +15,6 @@ import static net.minecraft.util.MovingObjectPosition.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL12.*;
 
-import mrtjp.projectred.core.*;
-
 import net.minecraft.block.*;
 import net.minecraft.client.*;
 import net.minecraft.client.gui.*;
@@ -38,6 +36,7 @@ import codechicken.microblock.*;
 import codechicken.multipart.*;
 import cpw.mods.fml.relauncher.*;
 import gcewing.projectblue.ControlPanelPart.ControlType;
+import mrtjp.projectred.core.*;
 
 public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
 
