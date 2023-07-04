@@ -6,15 +6,14 @@
 
 package gcewing.projectblue;
 
-import mrtjp.projectred.api.*;
-import mrtjp.projectred.core.libmc.PRLib;
-import mrtjp.projectred.transmission.IRedwireEmitter;
-
 import net.minecraft.nbt.*;
 import net.minecraft.tileentity.*;
 
 import codechicken.lib.vec.*;
 import codechicken.multipart.*;
+import mrtjp.projectred.api.*;
+import mrtjp.projectred.core.libmc.PRLib;
+import mrtjp.projectred.transmission.IRedwireEmitter;
 
 public abstract class PBWiredFacePart extends PBFacePart implements IConnectable, IRedstonePart {
 

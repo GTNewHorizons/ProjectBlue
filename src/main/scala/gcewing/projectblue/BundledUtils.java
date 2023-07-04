@@ -6,15 +6,14 @@
 
 package gcewing.projectblue;
 
-import mrtjp.projectred.api.*;
-import mrtjp.projectred.core.*;
-import mrtjp.projectred.core.libmc.*;
-
 import net.minecraft.tileentity.*;
 
 import codechicken.lib.vec.BlockCoord;
 import codechicken.lib.vec.Rotation;
 import codechicken.multipart.*;
+import mrtjp.projectred.api.*;
+import mrtjp.projectred.core.*;
+import mrtjp.projectred.core.libmc.*;
 
 public class BundledUtils {
 

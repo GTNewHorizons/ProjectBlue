@@ -11,12 +11,6 @@ import static net.minecraftforge.common.util.Constants.NBT.*;
 
 import java.util.*;
 
-import mrtjp.projectred.*;
-import mrtjp.projectred.api.*;
-import mrtjp.projectred.core.*;
-import mrtjp.projectred.illumination.*;
-import mrtjp.projectred.transmission.*;
-
 import net.minecraft.block.*;
 import net.minecraft.entity.item.*;
 import net.minecraft.entity.player.*;
@@ -33,6 +27,11 @@ import codechicken.lib.vec.*;
 import codechicken.microblock.*;
 import codechicken.multipart.*;
 import codechicken.multipart.MultiPartRegistry.IPartFactory;
+import mrtjp.projectred.*;
+import mrtjp.projectred.api.*;
+import mrtjp.projectred.core.*;
+import mrtjp.projectred.illumination.*;
+import mrtjp.projectred.transmission.*;
 
 public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         implements IConnectable, /* IRedwireEmitter, */ IBundledEmitter {
