@@ -177,8 +177,10 @@ public abstract class BaseNBTChannel<PACKET_TYPE extends Enum<?>> {
 
         @Override
         protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-            if (!desc.getName().equals(clazz.getName()) && !desc.getName().equals("java.lang.Enum")) {
-                ProjectBlue.logger.warn(ProjectBlue.securityMarker, "Received suspicious packet");
+            String name = desc.getName();
+            if (!name.equals(clazz.getName()) && !name.equals("java.lang.Enum")) {
+                ProjectBlue.logger
+                        .warn(ProjectBlue.securityMarker, "Received packet containing disallowed class: " + name);
                 throw new RuntimeException();
             }
             return super.resolveClass(desc);
