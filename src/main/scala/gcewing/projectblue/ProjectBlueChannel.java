@@ -28,6 +28,11 @@ public class ProjectBlueChannel extends BaseNBTChannel<ProjectBlueChannel.Messag
     }
 
     @Override
+    Class<Message> getPacketType() {
+        return ProjectBlueChannel.Message.class;
+    }
+
+    @Override
     void onReceiveFromClient(Message type, NBTTagCompound nbt, EntityPlayer player) {
         switch (type) {
             case UPDATE_CONTROL_PANEL_TEXT:
