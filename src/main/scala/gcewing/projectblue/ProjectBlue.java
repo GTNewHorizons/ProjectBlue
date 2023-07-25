@@ -23,6 +23,11 @@ import net.minecraft.world.*;
 import net.minecraftforge.common.*;
 import net.minecraftforge.event.*;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
 import codechicken.multipart.MultiPartRegistry;
 import codechicken.multipart.MultiPartRegistry.IPartFactory;
 import cpw.mods.fml.common.*;
@@ -37,6 +42,9 @@ import cpw.mods.fml.relauncher.*;
 public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
     public static ProjectBlue mod;
+
+    public static final Logger logger = LogManager.getLogger(Info.MODID);
+    public static final Marker securityMarker = MarkerManager.getMarker("SuspiciousPackets");
 
     public static Item controlPanelItem;
     public static Item miniatureLever, miniatureButton, miniatureLamp, miniatureCover, emptySprayCan;

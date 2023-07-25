@@ -19,13 +19,13 @@ import cpw.mods.fml.relauncher.*;
 import io.netty.buffer.*;
 import io.netty.channel.*;
 
-public class BaseNBTChannel<PACKET_TYPE extends Enum> {
+public abstract class BaseNBTChannel<PACKET_TYPE extends Enum<?>> {
 
     EnumMap<Side, FMLEmbeddedChannel> channels;
 
     public BaseNBTChannel(String channelName) {
         // System.out.printf("BaseNBTChannel created with name '%s'\n", channelName);
-        ChannelHandler codec = new NBTCodec<PACKET_TYPE>();
+        ChannelHandler codec = new NBTCodec();
         channels = NetworkRegistry.INSTANCE.newChannel(channelName, codec);
         for (Side side : Side.values()) {
             // System.out.printf("BaseNBTChannel: Adding NBTHandler to %s side\n", side);
@@ -38,6 +38,8 @@ public class BaseNBTChannel<PACKET_TYPE extends Enum> {
             // }
         }
     }
+
+    abstract Class<PACKET_TYPE> getPacketType();
 
     void onReceiveFromClient(PACKET_TYPE type, NBTTagCompound nbt, EntityPlayer player) {}
 
@@ -88,7 +90,7 @@ public class BaseNBTChannel<PACKET_TYPE extends Enum> {
 
     // ------------------------------------------------------------------------------------------------
 
-    static class NBTCodec<PACKET_TYPE extends Enum> extends FMLIndexedMessageToMessageCodec<NBTMessage<PACKET_TYPE>> {
+    class NBTCodec extends FMLIndexedMessageToMessageCodec<NBTMessage<PACKET_TYPE>> {
 
         NBTCodec() {
             // @SuppressWarnings("unchecked")
@@ -111,7 +113,7 @@ public class BaseNBTChannel<PACKET_TYPE extends Enum> {
         public void decodeInto(ChannelHandlerContext ctx, ByteBuf source, NBTMessage<PACKET_TYPE> msg) {
             InputStream bytes = new ByteBufInputStream(source);
             try {
-                ObjectInputStream stream = new ObjectInputStream(bytes);
+                ObjectInputStream stream = new ValidatingObjectInputStream(bytes, BaseNBTChannel.this.getPacketType());
                 msg.type = (PACKET_TYPE) stream.readObject();
                 // System.out.printf("BaseNBTChannel: Received type %s\n", msg.type);
                 msg.nbt = CompressedStreamTools.read(new DataInputStream(stream));
@@ -128,7 +130,7 @@ public class BaseNBTChannel<PACKET_TYPE extends Enum> {
 
     // static class NBTHandler<PACKET_TYPE extends Enum> extends SimpleChannelInboundHandler<NBTMessage<PACKET_TYPE>> {
 
-    static class NBTHandler<PACKET_TYPE extends Enum> extends ChannelInboundHandlerAdapter {
+    static class NBTHandler<PACKET_TYPE extends Enum<?>> extends ChannelInboundHandlerAdapter {
 
         BaseNBTChannel<PACKET_TYPE> client;
         Side side;
@@ -164,4 +166,22 @@ public class BaseNBTChannel<PACKET_TYPE extends Enum> {
 
     }
 
+    private static class ValidatingObjectInputStream extends ObjectInputStream {
+
+        private final Class<?> clazz;
+
+        public ValidatingObjectInputStream(InputStream in, Class<?> clazz) throws IOException {
+            super(in);
+            this.clazz = clazz;
+        }
+
+        @Override
+        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+            if (!desc.getName().equals(clazz.getName()) && !desc.getName().equals("java.lang.Enum")) {
+                ProjectBlue.logger.warn(ProjectBlue.securityMarker, "Received suspicious packet");
+                throw new RuntimeException();
+            }
+            return super.resolveClass(desc);
+        }
+    }
 }
