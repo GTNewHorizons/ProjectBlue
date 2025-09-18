@@ -71,8 +71,9 @@ public class ControlPanelLabelScreen extends GuiScreen {
 
     void insert(char c) {
         String s = getLine();
-        // if (s.length() < maxLength)
-        setLine(s + c);
+        if (s.length() < maxLength) {
+            setLine(s + c);
+        }
     }
 
     String getLine() {
