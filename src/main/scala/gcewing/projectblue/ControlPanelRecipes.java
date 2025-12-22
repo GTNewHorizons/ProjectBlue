@@ -161,13 +161,17 @@ public class ControlPanelRecipes {
 
         @Override
         public boolean matches(InventoryCrafting ic, World world) {
-            return isSaw(ic, 0, 0) && isControlPanel(ic.getStackInRowAndColumn(1, 1));
+            ItemStack stack = ic.getStackInRowAndColumn(1, 1);
+            return isSaw(ic, 0, 0) && stack != null && isControlPanel(stack);
         }
 
         @Override
         public ItemStack getCraftingResult(InventoryCrafting ic) {
             ItemStack original = ic.getStackInRowAndColumn(1, 1);
+            if (original == null) return null; // Safety check
+
             ItemStack result = original.copy();
+            result.stackSize = 1;
 
             if (!result.hasTagCompound()) result.setTagCompound(new NBTTagCompound());
             NBTTagCompound nbt = result.getTagCompound();
