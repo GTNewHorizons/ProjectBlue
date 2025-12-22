@@ -35,6 +35,13 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
         return "tile.wood";
     }
 
+    public static int getGridSize(ItemStack stack) {
+        if (stack != null && stack.hasTagCompound() && stack.getTagCompound().hasKey("gridSize")) {
+            return stack.getTagCompound().getInteger("gridSize");
+        }
+        return 4; // Default
+    }
+
     @Override
     public TMultiPart newPart(ItemStack stack, EntityPlayer player, World world, BlockCoord pos, int sideHit,
             Vector3 vhit) {
@@ -45,7 +52,10 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
     ControlPanelPart newPart(ItemStack stack, EntityPlayer player, int sideHit, Vector3 vhit) {
         String material = getMaterial(stack);
         int slot = FacePlacementGrid.getHitSlot(vhit, sideHit);
+
         ControlPanelPart part = new ControlPanelPart(material, slot, stack.getTagCompound());
+        part.gridSize = getGridSize(stack); // Ensure size is passed to part
+
         part.rot = Trans3.turnFor(player, slot);
         if (slot == (sideHit ^ 1)) part.setSurfaceMounting();
         else {
@@ -73,7 +83,25 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
 
     @Override
     public void getSubItems(Item item, CreativeTabs tab, List result) {
+        // Add 4x4
         result.add(ControlPanelMaterial.forName("tile.wood").newStack());
+
+        // Add 3x3
+        ItemStack s3 = ControlPanelMaterial.forName("tile.wood").newStack();
+        s3.getTagCompound().setInteger("gridSize", 3);
+        result.add(s3);
+
+        // Add 2x2
+        ItemStack s2 = ControlPanelMaterial.forName("tile.wood").newStack();
+        s2.getTagCompound().setInteger("gridSize", 2);
+        result.add(s2);
+    }
+
+    @Override
+    public String getItemStackDisplayName(ItemStack stack) {
+        String name = super.getItemStackDisplayName(stack);
+        int size = getGridSize(stack);
+        return name + " (" + size + "x" + size + ")";
     }
 
     @Override
@@ -81,6 +109,7 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
         ControlPanelMaterial base = ControlPanelMaterial.forName(getMaterial(stack));
         String uln = base.block.getUnlocalizedName() + ".name";
         list.add("Made from " + StatCollector.translateToLocal(uln));
+        list.add("Grid: " + getGridSize(stack) + "x" + getGridSize(stack));
     }
 
     @Override
