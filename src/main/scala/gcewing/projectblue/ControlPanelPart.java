@@ -55,7 +55,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     public int mounting; // 0 = flush, 1 = surface
     public int gridSize = 4; // Default to 4x4
     public int connectionMask;
-    
+
     // Arrays fixed at 16 to support max size (4x4)
     byte[] controlTypes = new byte[16];
     byte[] controlStates = new byte[16];
@@ -295,13 +295,13 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
                 Trans3 t = localToGlobalTransformation(hit.blockX, hit.blockY, hit.blockZ);
                 Vector3 p = t.ip(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord);
                 // System.out.printf("ControlPanelPart.activate: local (%s,%s,%s)\n", p.x, p.y, p.z);
-                
+
                 // Use gridSize for hit detection
                 int i = (int) floor((p.z + 0.5) * gridSize);
                 int j = (int) floor((-p.x + 0.5) * gridSize);
 
                 // System.out.printf("ControlPanelPart.activate: row %s col %s\n", i, j);
-                
+
                 if (i >= 0 && i < gridSize && j >= 0 && j < gridSize) {
                     activateCell(i * gridSize + j, player, stack);
                 }
@@ -390,7 +390,10 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         List<ItemStack> list = new ArrayList<ItemStack>();
         ItemStack stack = base.newStack();
         NBTTagCompound nbt = stack.getTagCompound();
-        if (nbt == null) { nbt = new NBTTagCompound(); stack.setTagCompound(nbt); }
+        if (nbt == null) {
+            nbt = new NBTTagCompound();
+            stack.setTagCompound(nbt);
+        }
         nbt.setInteger("gridSize", gridSize);
         saveControls(nbt);
         list.add(stack);
@@ -468,7 +471,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         long t_now = world().getTotalWorldTime();
         long t_next = -1;
         boolean release_occurred = false;
-        
+
         int totalCells = gridSize * gridSize;
         // System.out.printf("ControlPanelPart.scheduledTick: at %s\n", t_now);
         for (int i = 0; i < totalCells; i++) switch (getControlType(i)) {
@@ -531,7 +534,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     @Override
     public boolean connectInternal(IConnectable part, int r) {
         // System.out.printf("ControlPanelPart.connectInternal: to %s r=%s\n", part, r);
-        return connectTo(part, r); 
+        return connectTo(part, r);
     }
 
     @Override
@@ -560,8 +563,8 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     public byte[] getBundledSignal(int side) {
         int totalCells = gridSize * gridSize;
         // Reset signal array
-        for(int k=0; k<16; k++) signal[k] = 0;
-        
+        for (int k = 0; k < 16; k++) signal[k] = 0;
+
         for (int i = 0; i < totalCells; i++) switch (getControlType(i)) {
             case LEVER:
             case BUTTON:
@@ -585,7 +588,13 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     // ------------------------------------------------------------------------------------------------
 
     public static enum ControlType {
-        NONE, BLANK, LEVER, BUTTON, LAMP;
+
+        NONE,
+        BLANK,
+        LEVER,
+        BUTTON,
+        LAMP;
+
         public static ControlType[] values = values();
     }
 }

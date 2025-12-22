@@ -167,15 +167,15 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
             renderingInInventory = true;
             side = 3;
         }
-        
+
         stackGridSize = 4;
-        if(stack.hasTagCompound() && stack.getTagCompound().hasKey("gridSize")) {
+        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("gridSize")) {
             stackGridSize = stack.getTagCompound().getInteger("gridSize");
         }
 
         part = new ControlPanelPart(base, side, stack.getTagCompound());
         part.gridSize = stackGridSize; // Ensure part knows the size
-        
+
         Trans3 t = new Trans3(0.5, 0.5, 0.5).side(part.side);
         phase = Phase.STATIC;
         tess.startDrawingQuads();
@@ -293,7 +293,7 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
                 break;
         }
     }
-    
+
     int getGridSize() {
         if (part != null) return part.gridSize;
         return stackGridSize;
@@ -304,7 +304,7 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
             int N = getGridSize();
             double W = 1.0 / N;
             double S = 4.0 / N; // Scale factor relative to 4x4
-            
+
             switch (phase) {
                 case DYNAMIC:
                     FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
@@ -315,7 +315,7 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
                     glRotatef(180, 0, 0, 1);
                     glTranslated(-0.5, -0.5, -h - 2 * d1);
                     glScaled(1 / 160.0, 1 / 160.0, 1);
-                    
+
                     double gridScale = 160.0;
                     double cellPx = gridScale / N;
 
@@ -325,15 +325,15 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
                                 String s = part.labels[N * i + j][k];
                                 if (s != null && !s.isEmpty()) {
                                     int w = fr.getStringWidth(s) / 2;
-                                    
+
                                     // X is the horizontal center of the cell
                                     double drawX = j * cellPx + cellPx / 2.0;
-                                    
-                                    double topPadding = 2.0 * S; 
-                                    double lineSpacing = 10.0 * S; 
-                                    
+
+                                    double topPadding = 2.0 * S;
+                                    double lineSpacing = 10.0 * S;
+
                                     double drawY = (i * cellPx) + topPadding + (k * lineSpacing);
-                                    
+
                                     glPushMatrix();
                                     glTranslated(drawX, drawY, 0);
                                     glScaled(S, S, 1);
@@ -353,18 +353,18 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
     void renderControls(Trans3 t) {
         selectSide(t, 0);
         lightVertex(t, 0, 0, 0);
-        
+
         int N = getGridSize();
         double W = 1.0 / N; // Cell width (e.g., 0.5 for 2x2)
         double scale = 4.0 / N; // Scale factor (e.g., 2.0 for 2x2)
-        
+
         for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
-            
+
             double dx = (N - 1) / 2.0 * W - j * W;
             double dz = -(N - 1) / 2.0 * W + i * W;
-            
+
             Trans3 tij = t.translate(dx, -h, dz);
-            
+
             Trans3 tijScaled = tij.scale(scale);
 
             int k = N * i + j;
@@ -393,16 +393,16 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
     void renderBackCutouts(Trans3 t) {
         selectSideAndTile(t, 1, backCutoutIcon);
         lightVertex(t, 0, h, 0);
-        
+
         int N = getGridSize();
         double W = 1.0 / N;
         double scale = 4.0 / N;
-        
+
         for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
-            
+
             double x = -0.5 + i * W;
             double z = -0.5 + j * W;
-            
+
             face(t, x, h + d2, z, 0, 0, W, W, 0, 0, 0, 0, 1, 1);
         }
     }

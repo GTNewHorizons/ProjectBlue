@@ -154,9 +154,9 @@ public class ControlPanelRecipes {
         }
 
     }
-    
+
     // ------------------------------------------------------------------------------------------------
-    
+
     static class ResizeControlPanel extends RecipeBase {
 
         @Override
@@ -168,13 +168,13 @@ public class ControlPanelRecipes {
         public ItemStack getCraftingResult(InventoryCrafting ic) {
             ItemStack original = ic.getStackInRowAndColumn(1, 1);
             ItemStack result = original.copy();
-            
+
             if (!result.hasTagCompound()) result.setTagCompound(new NBTTagCompound());
             NBTTagCompound nbt = result.getTagCompound();
-            
+
             int currentSize = nbt.hasKey("gridSize") ? nbt.getInteger("gridSize") : 4;
             int newSize = getNextSize(currentSize);
-            
+
             nbt.setInteger("gridSize", newSize);
             return result;
         }
@@ -191,10 +191,10 @@ public class ControlPanelRecipes {
                 // To get "result", we need the previous size in the cycle
                 int resultSize = result.hasTagCompound() ? result.getTagCompound().getInteger("gridSize") : 4;
                 int inputSize = (resultSize == 4) ? 2 : (resultSize == 3) ? 4 : 3;
-                
+
                 ItemStack input = result.copy();
                 input.getTagCompound().setInteger("gridSize", inputSize);
-                
+
                 addRecipeToNEI(h, null, input, result);
             }
         }
@@ -221,7 +221,7 @@ public class ControlPanelRecipes {
         }
 
         private void showSizeCycle(INEIRecipeHandler h, ItemStack saw, ControlPanelMaterial mat) {
-            int[] sizes = {4, 3, 2};
+            int[] sizes = { 4, 3, 2 };
             for (int s : sizes) {
                 ItemStack input = mat.newStack();
                 input.setTagCompound(new NBTTagCompound());
