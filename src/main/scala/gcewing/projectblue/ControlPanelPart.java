@@ -229,8 +229,8 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         if (nbt.hasKey("controlStates")) controlStates = nbt.getByteArray("controlStates");
         if (nbt.hasKey("channelColors")) channelColors = nbt.getByteArray("channelColors");
         else {
-             // Reset to default linear mapping if loading old data
-             for(int i=0; i<16; i++) channelColors[i] = (byte)i;
+            // Reset to default linear mapping if loading old data
+            for (int i = 0; i < 16; i++) channelColors[i] = (byte) i;
         }
     }
 
@@ -302,25 +302,26 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     @Override
     public void click(EntityPlayer player, MovingObjectPosition hit, ItemStack stack) {
         if (!world().isRemote) {
-             Trans3 t = localToGlobalTransformation(hit.blockX, hit.blockY, hit.blockZ);
-             Vector3 p = t.ip(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord);
-             int i = (int) floor((p.z + 0.5) * gridSize);
-             int j = (int) floor((-p.x + 0.5) * gridSize);
+            Trans3 t = localToGlobalTransformation(hit.blockX, hit.blockY, hit.blockZ);
+            Vector3 p = t.ip(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord);
+            int i = (int) floor((p.z + 0.5) * gridSize);
+            int j = (int) floor((-p.x + 0.5) * gridSize);
 
-             if (i >= 0 && i < gridSize && j >= 0 && j < gridSize) {
-                 int cell = i * gridSize + j;
-                 boolean isPaintRemover = stack != null && stack.getItem() instanceof SprayCanItem && ((SprayCanItem)stack.getItem()).getColor(stack) == 16;
+            if (i >= 0 && i < gridSize && j >= 0 && j < gridSize) {
+                int cell = i * gridSize + j;
+                boolean isPaintRemover = stack != null && stack.getItem() instanceof SprayCanItem
+                        && ((SprayCanItem) stack.getItem()).getColor(stack) == 16;
 
-                 if ((player.isSneaking() && stack == null) || isPaintRemover) {
-                     setChannelColor(cell, cell); // Reset to default (linear mapping)
-                     updateInputs();
-                     changed(); // Saves state
-                     sendDescUpdate(); // Updates client visuals
-                     FaceUtils.notifyAllNeighbors(this, side); // Update wires instantly
-                     world().playSoundEffect(x() + 0.5, y() + 0.5, z() + 0.5, "step.snow", 1.0F, 1.5F);
-                     return; // Prevent breaking block
-                 }
-             }
+                if ((player.isSneaking() && stack == null) || isPaintRemover) {
+                    setChannelColor(cell, cell); // Reset to default (linear mapping)
+                    updateInputs();
+                    changed(); // Saves state
+                    sendDescUpdate(); // Updates client visuals
+                    FaceUtils.notifyAllNeighbors(this, side); // Update wires instantly
+                    world().playSoundEffect(x() + 0.5, y() + 0.5, z() + 0.5, "step.snow", 1.0F, 1.5F);
+                    return; // Prevent breaking block
+                }
+            }
         }
 
         if (!world().isRemote && player.isSneaking() && stack != null && stack.getItem() instanceof ItemScrewdriver) {
@@ -370,7 +371,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
             // System.out.printf("ControlPanelPart.activateCell: nbt = %s\n", nbt);
 
             if (item instanceof SprayCanItem) {
-                int color = ((SprayCanItem)item).getColor(stack);
+                int color = ((SprayCanItem) item).getColor(stack);
                 if (color == 16) {
                     setChannelColor(i, i);
                 } else {
@@ -649,8 +650,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
             case BUTTON:
                 int channel = getChannelColor(i);
                 if (channel >= 0 && channel < 16) {
-                    if (getControlState(i) > 0)
-                        signal[channel] = (byte) 255;
+                    if (getControlState(i) > 0) signal[channel] = (byte) 255;
                 }
                 break;
         }

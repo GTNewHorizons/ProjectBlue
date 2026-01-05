@@ -403,8 +403,8 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
             double dx = (N - 1) / 2.0 * W - j * W;
             double dz = -(N - 1) / 2.0 * W + i * W;
 
-            double x = dx - W/2.0;
-            double z = dz - W/2.0;
+            double x = dx - W / 2.0;
+            double z = dz - W / 2.0;
 
             face(t, x, h + d2, z, 0, 0, W, W, 0, 0, 0, 0, 1, 1);
         }
@@ -418,15 +418,15 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
 
                 double dx = (N - 1) / 2.0 * W - j * W;
                 double dz = -(N - 1) / 2.0 * W + i * W;
-                double x = dx - W/2.0;
-                double z = dz - W/2.0;
+                double x = dx - W / 2.0;
+                double z = dz - W / 2.0;
 
                 if (colorIndex >= 0 && colorIndex < 16) {
                     double[] c = colors[colorIndex];
-                    tess.setColorOpaque_F((float)c[0], (float)c[1], (float)c[2]);
+                    tess.setColorOpaque_F((float) c[0], (float) c[1], (float) c[2]);
 
                     double inset = W * 0.25;
-                    face(t, x + inset, h + d2 + d3, z + inset, 0, 0, W - 2*inset, W - 2*inset, 0, 0, 0, 0, 1, 1);
+                    face(t, x + inset, h + d2 + d3, z + inset, 0, 0, W - 2 * inset, W - 2 * inset, 0, 0, 0, 0, 1, 1);
                 }
             }
             tess.setColorOpaque_F(1, 1, 1);
