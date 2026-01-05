@@ -42,6 +42,7 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
 
     final static double h = 1 / 16.0; // Half thickness of control panel
     final static double d1 = 0.001, d2 = 0.01; // Offsets to prevent z-fighting
+    final static double d3 = 0.002; // Extra offset for back color indicators
 
     static float sideShading[] = { 0.5F, 1F, 0.8F, 0.8F, 0.6F, 0.6F };
     static double colors[][] = { { 1, 1, 1 }, // white
@@ -396,14 +397,39 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
 
         int N = getGridSize();
         double W = 1.0 / N;
-        double scale = 4.0 / N;
 
         for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
 
-            double x = -0.5 + i * W;
-            double z = -0.5 + j * W;
+            double dx = (N - 1) / 2.0 * W - j * W;
+            double dz = -(N - 1) / 2.0 * W + i * W;
+
+            double x = dx - W/2.0;
+            double z = dz - W/2.0;
 
             face(t, x, h + d2, z, 0, 0, W, W, 0, 0, 0, 0, 1, 1);
+        }
+
+        if (part != null) {
+            selectSideAndTile(t, 1, lampIcon);
+
+            for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
+                int cellIndex = (N * i + j);
+                int colorIndex = part.getChannelColor(cellIndex);
+
+                double dx = (N - 1) / 2.0 * W - j * W;
+                double dz = -(N - 1) / 2.0 * W + i * W;
+                double x = dx - W/2.0;
+                double z = dz - W/2.0;
+
+                if (colorIndex >= 0 && colorIndex < 16) {
+                    double[] c = colors[colorIndex];
+                    tess.setColorOpaque_F((float)c[0], (float)c[1], (float)c[2]);
+
+                    double inset = W * 0.25;
+                    face(t, x + inset, h + d2 + d3, z + inset, 0, 0, W - 2*inset, W - 2*inset, 0, 0, 0, 0, 1, 1);
+                }
+            }
+            tess.setColorOpaque_F(1, 1, 1);
         }
     }
 
