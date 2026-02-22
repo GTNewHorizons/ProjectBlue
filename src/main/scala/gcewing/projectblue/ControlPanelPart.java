@@ -62,12 +62,17 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     byte[] controlMetadata = new byte[16];
     public String[][] labels = new String[16][2];
 
+    public byte[] channelColors = new byte[16];
+
     public ControlPanelMaterial base;
     long[] releaseTime = new long[16];
     byte[] signal = new byte[16];
 
     public ControlPanelPart() {
-        for (int i = 0; i < 16; i++) for (int j = 0; j < 2; j++) labels[i][j] = "";
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 2; j++) labels[i][j] = "";
+            channelColors[i] = (byte) i;
+        }
     }
 
     public ControlPanelPart(String material, int side) {
@@ -130,6 +135,14 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         mounting = 1;
     }
 
+    public int getChannelColor(int i) {
+        return channelColors[i] & 0xFF;
+    }
+
+    public void setChannelColor(int i, int color) {
+        channelColors[i] = (byte) color;
+    }
+
     @Override
     public String getType() {
         return "pb_controlpanel";
@@ -161,6 +174,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
             data.writeByte(controlTypes[i]);
             data.writeByte(controlStates[i]);
             data.writeByte(controlMetadata[i]);
+            data.writeByte(channelColors[i]);
             for (int j = 0; j < 2; j++) data.writeString(labels[i][j]);
         }
     }
@@ -177,6 +191,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
             controlTypes[i] = data.readByte();
             controlStates[i] = data.readByte();
             controlMetadata[i] = data.readByte();
+            channelColors[i] = data.readByte();
             for (int j = 0; j < 2; j++) labels[i][j] = data.readString();
         }
     }
@@ -190,6 +205,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         nbt.setInteger("gridSize", gridSize);
         saveControls(nbt);
         nbt.setByteArray("controlStates", controlStates);
+        nbt.setByteArray("channelColors", channelColors);
     }
 
     public void saveControls(NBTTagCompound nbt) {
@@ -211,6 +227,11 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         if (nbt.hasKey("gridSize")) gridSize = nbt.getInteger("gridSize");
         loadControls(nbt);
         if (nbt.hasKey("controlStates")) controlStates = nbt.getByteArray("controlStates");
+        if (nbt.hasKey("channelColors")) channelColors = nbt.getByteArray("channelColors");
+        else {
+            // Reset to default linear mapping if loading old data
+            for (int i = 0; i < 16; i++) channelColors[i] = (byte) i;
+        }
     }
 
     public void loadControls(NBTTagCompound nbt) {
@@ -265,7 +286,12 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         for (int i = 0; i < totalCells; i++) {
             switch (getControlType(i)) {
                 case LAMP:
-                    setControlState(i, sig[i] != 0 ? 1 : 0);
+                    int ch = getChannelColor(i);
+                    if (ch >= 0 && ch < 16) {
+                        setControlState(i, sig[ch] != 0 ? 1 : 0);
+                    } else {
+                        setControlState(i, 0);
+                    }
                     break;
             }
         }
@@ -275,6 +301,29 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
 
     @Override
     public void click(EntityPlayer player, MovingObjectPosition hit, ItemStack stack) {
+        if (!world().isRemote) {
+            Trans3 t = localToGlobalTransformation(hit.blockX, hit.blockY, hit.blockZ);
+            Vector3 p = t.ip(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord);
+            int i = (int) floor((p.z + 0.5) * gridSize);
+            int j = (int) floor((-p.x + 0.5) * gridSize);
+
+            if (i >= 0 && i < gridSize && j >= 0 && j < gridSize) {
+                int cell = i * gridSize + j;
+                boolean isPaintRemover = stack != null && stack.getItem() instanceof SprayCanItem
+                        && ((SprayCanItem) stack.getItem()).getColor(stack) == 16;
+
+                if ((player.isSneaking() && stack == null) || isPaintRemover) {
+                    setChannelColor(cell, cell); // Reset to default (linear mapping)
+                    updateInputs();
+                    changed(); // Saves state
+                    sendDescUpdate(); // Updates client visuals
+                    FaceUtils.notifyAllNeighbors(this, side); // Update wires instantly
+                    world().playSoundEffect(x() + 0.5, y() + 0.5, z() + 0.5, "step.snow", 1.0F, 1.5F);
+                    return; // Prevent breaking block
+                }
+            }
+        }
+
         if (!world().isRemote && player.isSneaking() && stack != null && stack.getItem() instanceof ItemScrewdriver) {
             harvest(hit, player);
         }
@@ -297,6 +346,8 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
                 // System.out.printf("ControlPanelPart.activate: local (%s,%s,%s)\n", p.x, p.y, p.z);
 
                 // Use gridSize for hit detection
+
+                // i = Row (Z-axis local), j = Col (X-axis local inverted)
                 int i = (int) floor((p.z + 0.5) * gridSize);
                 int j = (int) floor((-p.x + 0.5) * gridSize);
 
@@ -318,6 +369,32 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
             NBTTagCompound nbt = stack.getTagCompound();
             // System.out.printf("ControlPanelPart.activateCell: item = %s\n", item);
             // System.out.printf("ControlPanelPart.activateCell: nbt = %s\n", nbt);
+
+            if (item instanceof SprayCanItem) {
+                int color = ((SprayCanItem) item).getColor(stack);
+                if (color == 16) {
+                    setChannelColor(i, i);
+                } else {
+                    setChannelColor(i, color);
+                }
+                updateInputs();
+                changed();
+                sendDescUpdate();
+                FaceUtils.notifyAllNeighbors(this, side);
+                world().playSoundEffect(x() + 0.5, y() + 0.5, z() + 0.5, "step.snow", 1.0F, 1.0F);
+                return;
+            }
+
+            if (item == Items.dye) {
+                int color = 15 - meta;
+                setChannelColor(i, color);
+                updateInputs();
+                changed();
+                sendDescUpdate();
+                FaceUtils.notifyAllNeighbors(this, side);
+                if (!player.capabilities.isCreativeMode) stack.stackSize--;
+                return;
+            }
 
             if (item instanceof ItemScrewdriver) {
                 if (player.isSneaking()) changeMounting();
@@ -455,6 +532,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         setControlState(i, state);
         playClick(state > 0 ? 0.6 : 0.5);
         changed();
+        FaceUtils.notifyAllNeighbors(this, side);
     }
 
     void pressButton(int i) {
@@ -464,6 +542,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         scheduleTick(buttonDownTime);
         playClick(0.6);
         changed();
+        FaceUtils.notifyAllNeighbors(this, side);
     }
 
     @Override
@@ -493,6 +572,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         if (release_occurred) {
             playClick(0.5);
             changed();
+            FaceUtils.notifyAllNeighbors(this, side);
         }
     }
 
@@ -568,7 +648,10 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         for (int i = 0; i < totalCells; i++) switch (getControlType(i)) {
             case LEVER:
             case BUTTON:
-                signal[i] = (byte) (255 * getControlState(i));
+                int channel = getChannelColor(i);
+                if (channel >= 0 && channel < 16) {
+                    if (getControlState(i) > 0) signal[channel] = (byte) 255;
+                }
                 break;
         }
         return signal;
