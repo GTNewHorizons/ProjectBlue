@@ -50,18 +50,10 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
     }
 
     ControlPanelPart newPart(ItemStack stack, EntityPlayer player, int sideHit, Vector3 vhit) {
+        if (stack == null) return null;
         String material = getMaterial(stack);
         int slot = FacePlacementGrid.getHitSlot(vhit, sideHit);
-
         ControlPanelPart part = new ControlPanelPart(material, slot, stack.getTagCompound());
-        part.gridSize = getGridSize(stack); // Ensure size is passed to part
-
-        part.rot = Trans3.turnFor(player, slot);
-        if (slot == (sideHit ^ 1)) part.setSurfaceMounting();
-        else {
-            part.setFlushMounting();
-            if (slot <= 1) part.rot ^= 2;
-        }
         return part;
     }
 
@@ -83,18 +75,12 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
 
     @Override
     public void getSubItems(Item item, CreativeTabs tab, List result) {
-        // Add 4x4
-        result.add(ControlPanelMaterial.forName("tile.wood").newStack());
-
-        // Add 3x3
-        ItemStack s3 = ControlPanelMaterial.forName("tile.wood").newStack();
-        s3.getTagCompound().setInteger("gridSize", 3);
-        result.add(s3);
-
-        // Add 2x2
-        ItemStack s2 = ControlPanelMaterial.forName("tile.wood").newStack();
-        s2.getTagCompound().setInteger("gridSize", 2);
-        result.add(s2);
+        final int[] sizes = new int[] { 4, 3, 2 };
+        for (int size : sizes) {
+            ItemStack is = ControlPanelMaterial.forName("tile.wood").newStack();
+            is.getTagCompound().setInteger("gridSize", size);
+            result.add(is);
+        }
     }
 
     @Override
@@ -109,12 +95,14 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
         ControlPanelMaterial base = ControlPanelMaterial.forName(getMaterial(stack));
         String uln = base.block.getUnlocalizedName() + ".name";
         list.add("Made from " + StatCollector.translateToLocal(uln));
-        list.add("Grid: " + getGridSize(stack) + "x" + getGridSize(stack));
+        int size = getGridSize(stack);
+        list.add("Grid: " + size + "x" + size);
     }
 
     @Override
     public boolean renderHighlight(DrawBlockHighlightEvent e) {
         ItemStack stack = e.currentItem;
+        if (stack == null) return false;
         EntityPlayer player = e.player;
         World world = e.player.worldObj;
         BlockCoord pos = new BlockCoord(e.target.blockX, e.target.blockY, e.target.blockZ);
@@ -123,6 +111,7 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
         Vector3 vhit = new Vector3(h.xCoord - pos.x, h.yCoord - pos.y, h.zCoord - pos.z);
         pos.offset(sideHit);
         ControlPanelPart part = (ControlPanelPart) newPart(stack, player, sideHit, vhit);
+        if (part == null) return false;
         if (TileMultipart.canPlacePart(world, pos, part))
             return ControlPanelRenderer.instance.renderHighlight(part, e, pos);
         return false;

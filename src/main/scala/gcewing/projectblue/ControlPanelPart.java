@@ -91,6 +91,8 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         if (nbt != null) {
             loadControls(nbt);
             if (nbt.hasKey("gridSize")) gridSize = nbt.getInteger("gridSize");
+            if (nbt.hasKey("controlStates")) controlStates = nbt.getByteArray("controlStates");
+            if (nbt.hasKey("channelColors")) channelColors = nbt.getByteArray("channelColors");
         }
     }
 
@@ -228,10 +230,6 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         loadControls(nbt);
         if (nbt.hasKey("controlStates")) controlStates = nbt.getByteArray("controlStates");
         if (nbt.hasKey("channelColors")) channelColors = nbt.getByteArray("channelColors");
-        else {
-            // Reset to default linear mapping if loading old data
-            for (int i = 0; i < 16; i++) channelColors[i] = (byte) i;
-        }
     }
 
     public void loadControls(NBTTagCompound nbt) {
@@ -301,29 +299,6 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
 
     @Override
     public void click(EntityPlayer player, MovingObjectPosition hit, ItemStack stack) {
-        if (!world().isRemote) {
-            Trans3 t = localToGlobalTransformation(hit.blockX, hit.blockY, hit.blockZ);
-            Vector3 p = t.ip(hit.hitVec.xCoord, hit.hitVec.yCoord, hit.hitVec.zCoord);
-            int i = (int) floor((p.z + 0.5) * gridSize);
-            int j = (int) floor((-p.x + 0.5) * gridSize);
-
-            if (i >= 0 && i < gridSize && j >= 0 && j < gridSize) {
-                int cell = i * gridSize + j;
-                boolean isPaintRemover = stack != null && stack.getItem() instanceof SprayCanItem
-                        && ((SprayCanItem) stack.getItem()).getColor(stack) == 16;
-
-                if ((player.isSneaking() && stack == null) || isPaintRemover) {
-                    setChannelColor(cell, cell); // Reset to default (linear mapping)
-                    updateInputs();
-                    changed(); // Saves state
-                    sendDescUpdate(); // Updates client visuals
-                    FaceUtils.notifyAllNeighbors(this, side); // Update wires instantly
-                    world().playSoundEffect(x() + 0.5, y() + 0.5, z() + 0.5, "step.snow", 1.0F, 1.5F);
-                    return; // Prevent breaking block
-                }
-            }
-        }
-
         if (!world().isRemote && player.isSneaking() && stack != null && stack.getItem() instanceof ItemScrewdriver) {
             harvest(hit, player);
         }
@@ -473,6 +448,8 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         }
         nbt.setInteger("gridSize", gridSize);
         saveControls(nbt);
+        nbt.setByteArray("controlStates", controlStates);
+        nbt.setByteArray("channelColors", channelColors);
         list.add(stack);
         return list;
     }

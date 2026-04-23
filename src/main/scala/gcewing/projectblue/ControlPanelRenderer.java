@@ -175,7 +175,6 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
         }
 
         part = new ControlPanelPart(base, side, stack.getTagCompound());
-        part.gridSize = stackGridSize; // Ensure part knows the size
 
         Trans3 t = new Trans3(0.5, 0.5, 0.5).side(part.side);
         phase = Phase.STATIC;
@@ -303,7 +302,6 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
     void renderLabels(Trans3 t) {
         if (part != null) {
             int N = getGridSize();
-            double W = 1.0 / N;
             double S = 4.0 / N; // Scale factor relative to 4x4
 
             switch (phase) {
@@ -436,7 +434,7 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
     void renderFrontCutout(Trans3 t) {
         switch (phase) {
             case STATIC:
-                selectSideAndTile(t, 0, renderingInInventory ? backCutoutIcon : frontCutoutIcon);
+                selectSideAndTile(t, 0, frontCutoutIcon);
                 lightVertex(t, 0, -h, 0);
                 face(t, -1 / 8.0, -d2, 1 / 8.0, 0, 0, -0.25, 0.25, 0, 0, 0, 0, 1, 1);
                 break;
