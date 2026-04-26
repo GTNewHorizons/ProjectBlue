@@ -353,8 +353,6 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
                     setChannelColor(i, color);
                 }
                 updateInputs();
-                changed();
-                sendDescUpdate();
                 FaceUtils.notifyAllNeighbors(this, side);
                 world().playSoundEffect(x() + 0.5, y() + 0.5, z() + 0.5, "step.snow", 1.0F, 1.0F);
                 return;
@@ -364,8 +362,6 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
                 int color = 15 - meta;
                 setChannelColor(i, color);
                 updateInputs();
-                changed();
-                sendDescUpdate();
                 FaceUtils.notifyAllNeighbors(this, side);
                 if (!player.capabilities.isCreativeMode) stack.stackSize--;
                 return;
@@ -509,7 +505,6 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         setControlState(i, state);
         playClick(state > 0 ? 0.6 : 0.5);
         changed();
-        FaceUtils.notifyAllNeighbors(this, side);
     }
 
     void pressButton(int i) {
@@ -519,7 +514,6 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         scheduleTick(buttonDownTime);
         playClick(0.6);
         changed();
-        FaceUtils.notifyAllNeighbors(this, side);
     }
 
     @Override
@@ -549,7 +543,6 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         if (release_occurred) {
             playClick(0.5);
             changed();
-            FaceUtils.notifyAllNeighbors(this, side);
         }
     }
 
