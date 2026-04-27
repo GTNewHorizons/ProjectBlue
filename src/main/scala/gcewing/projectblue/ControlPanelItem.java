@@ -95,8 +95,6 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
         ControlPanelMaterial base = ControlPanelMaterial.forName(getMaterial(stack));
         String uln = base.block.getUnlocalizedName() + ".name";
         list.add("Made from " + StatCollector.translateToLocal(uln));
-        int size = getGridSize(stack);
-        list.add("Grid: " + size + "x" + size);
     }
 
     @Override
