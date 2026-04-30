@@ -42,6 +42,7 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
 
     final static double h = 1 / 16.0; // Half thickness of control panel
     final static double d1 = 0.001, d2 = 0.01; // Offsets to prevent z-fighting
+    final static double d3 = 0.002; // Extra offset for back color indicators
 
     static float sideShading[] = { 0.5F, 1F, 0.8F, 0.8F, 0.6F, 0.6F };
     static double colors[][] = { { 1, 1, 1 }, // white
@@ -77,6 +78,8 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
     float alpha;
     boolean renderingInInventory;
     boolean debugLightVertex = false;
+
+    int stackGridSize = 4;
 
     public static enum Phase {
         STATIC,
@@ -165,7 +168,14 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
             renderingInInventory = true;
             side = 3;
         }
+
+        stackGridSize = 4;
+        if (stack.hasTagCompound() && stack.getTagCompound().hasKey("gridSize")) {
+            stackGridSize = stack.getTagCompound().getInteger("gridSize");
+        }
+
         part = new ControlPanelPart(base, side, stack.getTagCompound());
+
         Trans3 t = new Trans3(0.5, 0.5, 0.5).side(part.side);
         phase = Phase.STATIC;
         tess.startDrawingQuads();
@@ -284,8 +294,16 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
         }
     }
 
+    int getGridSize() {
+        if (part != null) return part.gridSize;
+        return stackGridSize;
+    }
+
     void renderLabels(Trans3 t) {
         if (part != null) {
+            int N = getGridSize();
+            double S = 4.0 / N; // Scale factor relative to 4x4
+
             switch (phase) {
                 case DYNAMIC:
                     FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
@@ -296,11 +314,32 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
                     glRotatef(180, 0, 0, 1);
                     glTranslated(-0.5, -0.5, -h - 2 * d1);
                     glScaled(1 / 160.0, 1 / 160.0, 1);
-                    for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) for (int k = 0; k < 2; k++) {
-                        String s = part.labels[4 * i + j][k];
-                        if (s != null) {
-                            int w = fr.getStringWidth(s) / 2;
-                            fr.drawString(s, j * 40 + 20 - w, 1 + i * 40 + k * 30, 0);
+
+                    double gridScale = 160.0;
+                    double cellPx = gridScale / N;
+
+                    for (int i = 0; i < N; i++) {
+                        for (int j = 0; j < N; j++) {
+                            for (int k = 0; k < 2; k++) {
+                                String s = part.labels[N * i + j][k];
+                                if (s != null && !s.isEmpty()) {
+                                    int w = fr.getStringWidth(s) / 2;
+
+                                    // X is the horizontal center of the cell
+                                    double drawX = j * cellPx + cellPx / 2.0;
+
+                                    double topPadding = 2.0 * S;
+                                    double lineSpacing = 10.0 * S;
+
+                                    double drawY = (i * cellPx) + topPadding + (k * lineSpacing);
+
+                                    glPushMatrix();
+                                    glTranslated(drawX, drawY, 0);
+                                    glScaled(S, S, 1);
+                                    fr.drawString(s, -w, 0, 0);
+                                    glPopMatrix();
+                                }
+                            }
                         }
                     }
 
@@ -313,25 +352,37 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
     void renderControls(Trans3 t) {
         selectSide(t, 0);
         lightVertex(t, 0, 0, 0);
-        for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
-            Trans3 tij = t.translate(3 / 8.0 - j * 0.25, -h, -3 / 8.0 + i * 0.25);
-            int k = 4 * i + j;
-            if (part == null) renderFrontCutout(tij);
+
+        int N = getGridSize();
+        double W = 1.0 / N; // Cell width (e.g., 0.5 for 2x2)
+        double scale = 4.0 / N; // Scale factor (e.g., 2.0 for 2x2)
+
+        for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
+
+            double dx = (N - 1) / 2.0 * W - j * W;
+            double dz = -(N - 1) / 2.0 * W + i * W;
+
+            Trans3 tij = t.translate(dx, -h, dz);
+
+            Trans3 tijScaled = tij.scale(scale);
+
+            int k = N * i + j;
+            if (part == null) renderFrontCutout(tijScaled);
             else {
                 int meta = part.getControlMeta(k);
                 int state = part.getControlState(k);
                 switch (part.getControlType(k)) {
                     case NONE:
-                        renderFrontCutout(tij);
+                        renderFrontCutout(tijScaled);
                         break;
                     case LEVER:
-                        renderLever(tij, meta, state);
+                        renderLever(tijScaled, meta, state);
                         break;
                     case BUTTON:
-                        renderButton(tij, meta, state);
+                        renderButton(tijScaled, meta, state);
                         break;
                     case LAMP:
-                        renderLamp(tij, meta, state);
+                        renderLamp(tijScaled, meta, state);
                         break;
                 }
             }
@@ -341,14 +392,49 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
     void renderBackCutouts(Trans3 t) {
         selectSideAndTile(t, 1, backCutoutIcon);
         lightVertex(t, 0, h, 0);
-        for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++)
-            face(t, -0.5 + i * 0.25, h + d2, -0.5 + j * 0.25, 0, 0, 0.25, 0.25, 0, 0, 0, 0, 1, 1);
+
+        int N = getGridSize();
+        double W = 1.0 / N;
+
+        for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
+
+            double dx = (N - 1) / 2.0 * W - j * W;
+            double dz = -(N - 1) / 2.0 * W + i * W;
+
+            double x = dx - W / 2.0;
+            double z = dz - W / 2.0;
+
+            face(t, x, h + d2, z, 0, 0, W, W, 0, 0, 0, 0, 1, 1);
+        }
+
+        if (part != null) {
+            selectSideAndTile(t, 1, lampIcon);
+
+            for (int i = 0; i < N; i++) for (int j = 0; j < N; j++) {
+                int cellIndex = (N * i + j);
+                int colorIndex = part.getChannelColor(cellIndex);
+
+                double dx = (N - 1) / 2.0 * W - j * W;
+                double dz = -(N - 1) / 2.0 * W + i * W;
+                double x = dx - W / 2.0;
+                double z = dz - W / 2.0;
+
+                if (colorIndex >= 0 && colorIndex < 16) {
+                    double[] c = colors[colorIndex];
+                    tess.setColorOpaque_F((float) c[0], (float) c[1], (float) c[2]);
+
+                    double inset = W * 0.25;
+                    face(t, x + inset, h + d2 + d3, z + inset, 0, 0, W - 2 * inset, W - 2 * inset, 0, 0, 0, 0, 1, 1);
+                }
+            }
+            tess.setColorOpaque_F(1, 1, 1);
+        }
     }
 
     void renderFrontCutout(Trans3 t) {
         switch (phase) {
             case STATIC:
-                selectSideAndTile(t, 0, renderingInInventory ? backCutoutIcon : frontCutoutIcon);
+                selectSideAndTile(t, 0, frontCutoutIcon);
                 lightVertex(t, 0, -h, 0);
                 face(t, -1 / 8.0, -d2, 1 / 8.0, 0, 0, -0.25, 0.25, 0, 0, 0, 0, 1, 1);
                 break;
@@ -498,11 +584,11 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
                     (int) floor(p.y + 0.01 * gd.offsetY),
                     (int) floor(p.z + 0.01 * gd.offsetZ));
             tess.setBrightness(br);
-            float bm = sideShading[globalSide];
             // tess.setColorOpaque_F(bm * cmr, bm * cmg, bm * cmb);
-            tess.setColorRGBA_F(bm * cmr, bm * cmg, bm * cmb, alpha);
+            float bm = sideShading[globalSide];
             // if (debugLightVertex)
             // System.out.printf("ControlPanelRenderer.lightVertex: br = 0x%x bm = %.3f\n", br, bm);
+            tess.setColorRGBA_F(bm * cmr, bm * cmg, bm * cmb, alpha);
         } else {
             tess.setColorOpaque_F(1, 1, 1);
             tess.setBrightness(blockBrightness);
