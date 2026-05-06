@@ -54,6 +54,13 @@ public class ControlPanelItem extends ItemMultiPartJ implements IBlockHighlighti
         String material = getMaterial(stack);
         int slot = FacePlacementGrid.getHitSlot(vhit, sideHit);
         ControlPanelPart part = new ControlPanelPart(material, slot, stack.getTagCompound());
+
+        part.rot = Trans3.turnFor(player, slot);
+        if (slot == (sideHit ^ 1)) part.setSurfaceMounting();
+        else {
+            part.setFlushMounting();
+            if (slot <= 1) part.rot ^= 2;
+        }
         return part;
     }
 

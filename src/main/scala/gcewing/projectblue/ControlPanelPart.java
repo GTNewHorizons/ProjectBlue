@@ -285,7 +285,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
             switch (getControlType(i)) {
                 case LAMP:
                     int ch = getChannelColor(i);
-                    if (ch >= 0 && ch < 16) {
+                    if (ch < 16) {
                         setControlState(i, sig[ch] != 0 ? 1 : 0);
                     } else {
                         setControlState(i, 0);
@@ -337,7 +337,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     }
 
     void activateCell(int i, EntityPlayer player, ItemStack stack) {
-        System.out.printf("ControlPanelPart.activateCell: %s containing %s with %s\n", i, getControlType(i), stack);
+       // System.out.printf("ControlPanelPart.activateCell: %s containing %s with %s\n", i, getControlType(i), stack);
         if (stack != null) {
             Item item = stack.getItem();
             int meta = stack.getItemDamage();
@@ -619,7 +619,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
             case LEVER:
             case BUTTON:
                 int channel = getChannelColor(i);
-                if (channel >= 0 && channel < 16) {
+                if (channel < 16) {
                     if (getControlState(i) > 0) signal[channel] = (byte) 255;
                 }
                 break;

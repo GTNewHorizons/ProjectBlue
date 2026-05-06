@@ -419,7 +419,7 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
                 double x = dx - W / 2.0;
                 double z = dz - W / 2.0;
 
-                if (colorIndex >= 0 && colorIndex < 16) {
+                if (colorIndex < 16) {
                     double[] c = colors[colorIndex];
                     tess.setColorOpaque_F((float) c[0], (float) c[1], (float) c[2]);
 
