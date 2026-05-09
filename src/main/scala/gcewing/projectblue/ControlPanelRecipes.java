@@ -15,6 +15,7 @@ import net.minecraft.init.*;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.*;
 import net.minecraft.item.crafting.*;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.oredict.*;
 
@@ -156,6 +157,96 @@ public class ControlPanelRecipes {
 
     // ------------------------------------------------------------------------------------------------
 
+    static class ResizeControlPanel extends RecipeBase {
+
+        @Override
+        public boolean matches(InventoryCrafting ic, World world) {
+            if (!isSaw(ic, 0, 0)) return false;
+            ItemStack panel = ic.getStackInRowAndColumn(1, 1);
+            if (panel == null || !isControlPanel(panel)) return false;
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    if (row == 0 && col == 0) continue;
+                    if (row == 1 && col == 1) continue;
+                    if (ic.getStackInRowAndColumn(col, row) != null) return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public ItemStack getCraftingResult(InventoryCrafting ic) {
+            ItemStack original = ic.getStackInRowAndColumn(1, 1);
+            if (original == null) return null; // Safety check
+
+            ItemStack result = original.copy();
+            result.stackSize = 1;
+
+            if (!result.hasTagCompound()) result.setTagCompound(new NBTTagCompound());
+            NBTTagCompound nbt = result.getTagCompound();
+
+            int currentSize = nbt.hasKey("gridSize") ? nbt.getInteger("gridSize") : 4;
+            int newSize = getNextSize(currentSize);
+
+            nbt.setInteger("gridSize", newSize);
+            return result;
+        }
+
+        private static int getNextSize(int current) {
+            if (current == 4) return 3;
+            if (current == 3) return 2;
+            return 4;
+        }
+
+        private static int getPrevSize(int current) {
+            if (current == 2) return 3;
+            if (current == 3) return 4;
+            return 2;
+        }
+
+        @Override
+        public void addCraftingToNEI(INEIRecipeHandler h, ItemStack result) {
+            if (isControlPanel(result)) {
+                int resultSize = result.hasTagCompound() ? result.getTagCompound().getInteger("gridSize") : 4;
+                int inputSize = getPrevSize(resultSize);
+                ItemStack input = result.copy();
+                input.getTagCompound().setInteger("gridSize", inputSize);
+                addRecipeToNEI(h, null, input, result);
+            }
+        }
+
+        @Override
+        public void addUsageToNEI(INEIRecipeHandler h, ItemStack ingredient) {
+            if (isSaw(ingredient)) {
+                ControlPanelMaterial wood = ControlPanelMaterial.forName("tile.wood");
+                ItemStack input = wood.newStack();
+                input.getTagCompound().setInteger("gridSize", 4);
+                ItemStack output = input.copy();
+                output.getTagCompound().setInteger("gridSize", 3);
+                addRecipeToNEI(h, ingredient, input, output);
+            } else if (isControlPanel(ingredient)) {
+                ItemStack result = getCraftingResultFromStack(ingredient);
+                addRecipeToNEI(h, null, ingredient, result);
+            }
+        }
+
+        private ItemStack getCraftingResultFromStack(ItemStack stack) {
+            ItemStack result = stack.copy();
+            if (!result.hasTagCompound()) result.setTagCompound(new NBTTagCompound());
+            int current = result.getTagCompound().getInteger("gridSize");
+            if (current == 0) current = 4;
+            result.getTagCompound().setInteger("gridSize", getNextSize(current));
+            return result;
+        }
+
+        void addRecipeToNEI(INEIRecipeHandler h, ItemStack saw, ItemStack input, ItemStack output) {
+            if (saw == null) saw = ProjectBlue.stackStoneSaw;
+            h.addShapedRecipe(2, 2, output, saw, null, null, input);
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
     static class CraftMiniatureItem extends RecipeBase {
 
         @Override
@@ -287,6 +378,7 @@ public class ControlPanelRecipes {
     public static void registerRecipes() {
         RecipeSorter.register("projectblue:controlpanel", RecipeBase.class, SHAPED, "");
         addRecipe(new CraftControlPanel());
+        addRecipe(new ResizeControlPanel());
         addRecipe(new CraftMiniatureItem());
         addRecipe(new PaintControl());
     }

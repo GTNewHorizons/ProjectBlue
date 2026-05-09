@@ -67,6 +67,16 @@ public class ControlPanelMaterial {
         ItemStack stack = new ItemStack(item, 1, meta);
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setString("mat", name);
+        nbt.setByteArray("controlTypes", new byte[16]);
+        nbt.setByteArray("controlMetadata", new byte[16]);
+        nbt.setByteArray("controlStates", new byte[16]);
+        byte[] defaultColors = new byte[16];
+        for (int i = 0; i < 16; i++) defaultColors[i] = (byte) i;
+        nbt.setByteArray("channelColors", defaultColors);
+        NBTTagList labels = new NBTTagList();
+        for (int i = 0; i < 32; i++) labels.appendTag(new NBTTagString(""));
+        nbt.setTag("labels", labels);
+        nbt.setInteger("gridSize", 4);
         stack.setTagCompound(nbt);
         // System.out.printf("ControlPanelMaterial.newStack: returning %s\n", stack);
         return stack;

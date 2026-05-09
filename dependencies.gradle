@@ -1,7 +1,7 @@
 // Add your dependencies here
 
 dependencies {
-    api("com.github.GTNewHorizons:ProjectRed:4.12.33-GTNH:dev")
-    compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.8.93-GTNH:dev")
+    api("com.github.GTNewHorizons:ProjectRed:4.12.37-GTNH:dev")
+    compileOnly("com.github.GTNewHorizons:NotEnoughItems:2.8.97-GTNH:dev")
     compileOnly('curse.maven:minefactory-reloaded-66672:2366150')
 }
