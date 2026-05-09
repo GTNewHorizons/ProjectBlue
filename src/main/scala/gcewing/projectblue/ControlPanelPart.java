@@ -337,7 +337,7 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
     }
 
     void activateCell(int i, EntityPlayer player, ItemStack stack) {
-       // System.out.printf("ControlPanelPart.activateCell: %s containing %s with %s\n", i, getControlType(i), stack);
+        // System.out.printf("ControlPanelPart.activateCell: %s containing %s with %s\n", i, getControlType(i), stack);
         if (stack != null) {
             Item item = stack.getItem();
             int meta = stack.getItemDamage();
