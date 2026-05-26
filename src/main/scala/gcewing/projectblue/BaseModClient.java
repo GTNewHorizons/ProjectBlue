@@ -194,7 +194,6 @@ public class BaseModClient<MOD extends BaseMod<? extends BaseModClient>> impleme
     void addBlockRenderer(ISimpleBlockRenderingHandler renderer, IBlock... blocks) {
         int renderID = RenderingRegistry.getNextAvailableRenderId();
         for (IBlock block : blocks) {
-            System.out.printf("BaseModClient: Registering %s with id %s for %s\n", renderer, renderID, block);
             block.setRenderType(renderID);
             RenderingRegistry.registerBlockHandler(renderID, renderer);
         }
@@ -240,7 +239,6 @@ public class BaseModClient<MOD extends BaseMod<? extends BaseModClient>> impleme
     @SubscribeEvent
     public void onTextureStitchPre(TextureStitchEvent.Pre e) {
         int type = e.map.getTextureType();
-        System.out.printf("BaseModClient.onTextureStitchPre: for texture type %s\n", type);
         switch (type) {
             case 0:
                 registerBlockIcons(e.map);

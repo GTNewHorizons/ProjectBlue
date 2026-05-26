@@ -34,9 +34,6 @@ public class NEIRecipeHandler extends ShapedRecipeHandler implements INEIRecipeH
 
     @Override
     public void addShapedRecipe(int width, int height, ItemStack out, Object... items) {
-        System.out.printf("NEIRecipeHandler.addShapedRecipe: %sx%s producing %s from", width, height, out);
-        for (Object item : items) System.out.printf(" %s", item);
-        System.out.printf("\n");
         arecipes.add(new CachedShapedRecipe(width, height, items, out));
     }
 

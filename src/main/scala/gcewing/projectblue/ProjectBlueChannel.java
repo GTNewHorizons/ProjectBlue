@@ -50,7 +50,6 @@ public class ProjectBlueChannel extends BaseNBTChannel<ProjectBlueChannel.Messag
         NBTTagCompound nbt = new NBTTagCompound();
         setPart(nbt, part);
         nbt.setInteger("cell", cell);
-        System.out.printf("ProjectBlueChannel.sendEditControlPanelText: to %s\n", player);
         sendToPlayer(Message.EDIT_CONTROL_PANEL_TEXT, nbt, player);
     }
 

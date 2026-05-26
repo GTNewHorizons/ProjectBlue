@@ -33,7 +33,6 @@ import codechicken.multipart.MultiPartRegistry.IPartFactory;
 import cpw.mods.fml.common.*;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.eventhandler.*;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.registry.*;
 import cpw.mods.fml.relauncher.*;
 
@@ -69,14 +68,12 @@ public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent e) {
-        System.out.printf("ProjectBlue.preInit\n");
         integrateWith("MineFactoryReloaded", "gcewing.projectblue.mfr.MFRIntegration");
         super.preInit(e);
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent e) {
-        System.out.printf("ProjectBlue.init\n");
         super.init(e);
         configure();
         registerMultiParts();
@@ -84,7 +81,6 @@ public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent e) {
-        System.out.printf("ProjectBlue.postInit\n");
         super.postInit(e);
         channel = new ProjectBlueChannel("gce.projectblue");
         dataChannel = new BaseDataChannel("projectblue.data", this, client);
@@ -119,7 +115,6 @@ public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
     @Override
     protected void registerItems() {
-        System.out.printf("ProjectBlue.registerItems\n");
         controlPanelItem = addItem(new ControlPanelItem(), "controlPanel");
         miniatureLever = addItem(new ControlItem(LEVER), "miniatureLever");
         miniatureButton = addItem(new ControlItem(BUTTON), "miniatureButton");
@@ -149,25 +144,23 @@ public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
     // ------------------------------------------------------------------------------------------------
 
-    @SubscribeEvent
-    public void onServerTick(ServerTickEvent e) {
-        switch (e.phase) {
-            case END:
-                onServerTickEnd();
-                break;
-        }
-    }
+    // @SubscribeEvent
+    // public void onServerTick(ServerTickEvent e) {
+    // if (e.phase == TickEvent.Phase.END) {
+    // onServerTickEnd();
+    // }
+    // }
 
-    void onServerTickEnd() {
-        // PneumaticTubePart.onServerTickEnd();
-    }
+    // void onServerTickEnd() {
+    // // PneumaticTubePart.onServerTickEnd();
+    // }
 
     // ------------------------------------------------------------------------------------------------
 
     public static void addMultiPart(IPartFactory factory, String... types) {
-        System.out.printf("ProjectBlue.addMultiPart: using %s:", factory);
-        for (String s : types) System.out.printf(" %s", s);
-        System.out.printf("\n");
+        // System.out.printf("ProjectBlue.addMultiPart: using %s:", factory);
+        // for (String s : types) System.out.printf(" %s", s);
+        // System.out.printf("\n");
         MultiPartRegistry.registerParts(factory, types);
     }
 

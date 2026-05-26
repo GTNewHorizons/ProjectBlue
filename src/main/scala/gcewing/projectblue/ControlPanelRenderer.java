@@ -101,11 +101,6 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
         frontCutoutIcon = reg.registerIcon("gcewing_projectblue:controlpanel_cutout_front");
         backCutoutIcon = reg.registerIcon("gcewing_projectblue:controlpanel_cutout_back");
         lampIcon = reg.registerIcon("gcewing_projectblue:controlpanel_lamp");
-        System.out.printf(
-                "ControlPanelRenderer.registerIcons: icons = %s %s %s\n",
-                frontCutoutIcon,
-                backCutoutIcon,
-                lampIcon);
     }
 
     void bindBlockTextures() {

@@ -76,9 +76,7 @@ public class ProjectBlueClient extends BaseModClient<ProjectBlue> {
     }
 
     void onReceiveEditControlPanelText(NBTTagCompound nbt) {
-        System.out.printf("ProjectBlueChannel.onReceiveEditControlPanelText: %s\n", nbt);
         TMultiPart part = getClientPart(nbt);
-        System.out.printf("ProjectBlueChannel.onReceiveEditControlPanelText: part = %s\n", part);
         if (part instanceof ControlPanelPart) {
             int cell = nbt.getInteger("cell");
             openClientGui(new ControlPanelLabelScreen((ControlPanelPart) part, cell));

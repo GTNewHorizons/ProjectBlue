@@ -31,7 +31,6 @@ public class MFRIntegration extends gcewing.projectblue.BaseIntegration {
 
     @Override
     protected void registerBlocks() {
-        System.out.printf("ProjectBlue: MFRIntegration.registerBlocks\n");
         rednetAdaptorBlock = mod.newBlock("rednetAdaptor", RednetAdaptorBlock.class);
     }
 
@@ -42,7 +41,6 @@ public class MFRIntegration extends gcewing.projectblue.BaseIntegration {
 
     @Override
     protected void registerScreens() {
-        System.out.printf("MFRIntegration.registerScreens\n");
         mod.client.addScreen(PBGui.RednetAdaptor, RednetAdaptorGui.class);
     }
 

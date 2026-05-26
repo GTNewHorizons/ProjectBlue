@@ -219,9 +219,7 @@ public class BaseMod<CLIENT extends BaseModClient<? extends BaseMod>> extends Ba
         item.setUnlocalizedName(qualName);
         item.setTextureName(qualName);
         GameRegistry.registerItem(item, name);
-        System.out.printf("BaseMod.addItem: Registered %s as %s\n", item, name);
         if (creativeTab != null) {
-            System.out.printf("BaseMod.addItem: Setting creativeTab to %s\n", creativeTab);
             item.setCreativeTab(creativeTab);
         }
         return item;
@@ -256,10 +254,8 @@ public class BaseMod<CLIENT extends BaseModClient<? extends BaseMod>> extends Ba
         String qualName = assetKey + ":" + name;
         block.setBlockName(qualName);
         block.setBlockTextureName(qualName);
-        System.out.printf("BaseMod.addBlock: name '%s' qualName '%s' %s\n", name, qualName, block);
         GameRegistry.registerBlock(block, itemClass, name);
         if (creativeTab != null) {
-            System.out.printf("BaseMod.addBlock: Setting creativeTab to %s\n", creativeTab);
             block.setCreativeTab(creativeTab);
         }
         if (block instanceof IBlock) registeredBlocks.add((IBlock) block);
@@ -355,12 +351,6 @@ public class BaseMod<CLIENT extends BaseModClient<? extends BaseMod>> extends Ba
 
     public void addEntity(Class<? extends Entity> cls, String name, int id, int updateFrequency,
             boolean sendVelocityUpdates) {
-        System.out.printf(
-                "%s: BaseMod.addEntity: %s, \"%s\", %s\n",
-                getClass().getSimpleName(),
-                cls.getSimpleName(),
-                name,
-                id);
         EntityRegistry.registerModEntity(cls, name, id, /* base */this, 256, updateFrequency, sendVelocityUpdates);
     }
 
@@ -610,7 +600,6 @@ public class BaseMod<CLIENT extends BaseModClient<? extends BaseMod>> extends Ba
 
     public static void reportExceptionCause(Exception e) {
         Throwable cause = e.getCause();
-        System.out.printf("BaseMod.createGuiElement: %s: %s\n", e, cause);
         if (cause != null) cause.printStackTrace();
         else e.printStackTrace();
     }
