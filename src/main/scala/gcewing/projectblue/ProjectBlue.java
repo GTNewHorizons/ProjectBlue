@@ -142,25 +142,7 @@ public class ProjectBlue extends BaseMod<ProjectBlueClient> {
         // addContainer(PBGui.PneumaticExtractor, PneumaticExtractorContainer.class);
     }
 
-    // ------------------------------------------------------------------------------------------------
-
-    // @SubscribeEvent
-    // public void onServerTick(ServerTickEvent e) {
-    // if (e.phase == TickEvent.Phase.END) {
-    // onServerTickEnd();
-    // }
-    // }
-
-    // void onServerTickEnd() {
-    // // PneumaticTubePart.onServerTickEnd();
-    // }
-
-    // ------------------------------------------------------------------------------------------------
-
     public static void addMultiPart(IPartFactory factory, String... types) {
-        // System.out.printf("ProjectBlue.addMultiPart: using %s:", factory);
-        // for (String s : types) System.out.printf(" %s", s);
-        // System.out.printf("\n");
         MultiPartRegistry.registerParts(factory, types);
     }
 
