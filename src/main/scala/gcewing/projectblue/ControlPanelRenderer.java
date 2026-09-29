@@ -323,8 +323,9 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
                                     // X is the horizontal center of the cell
                                     double drawX = j * cellPx + cellPx / 2.0;
 
-                                    double topPadding = 2.0 * S;
-                                    double lineSpacing = 10.0 * S;
+                                    // Line 1 goes above the control, line 2 below it
+                                    double topPadding = 1.0 * S;
+                                    double lineSpacing = 30.0 * S;
 
                                     double drawY = (i * cellPx) + topPadding + (k * lineSpacing);
 
