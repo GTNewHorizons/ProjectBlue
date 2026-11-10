@@ -146,8 +146,13 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
         alpha = 0.5F;
         tess.startDrawingQuads();
         debugLightVertex = true;
-        renderPart(t);
-        debugLightVertex = false;
+        try {
+            renderPart(t);
+        } finally {
+            debugLightVertex = false;
+            this.world = null;
+            this.part = null;
+        }
         tess.draw();
         glPopAttrib();
         glPopMatrix();
@@ -271,7 +276,12 @@ public class ControlPanelRenderer extends BaseBlockRenderer<Block> {
         tess = Tessellator.instance;
         tess.setColorOpaque_F(1, 1, 1);
         Trans3 t = part.localToGlobalTransformation(x, y, z);
-        renderPart(t);
+        try {
+            renderPart(t);
+        } finally {
+            this.world = null;
+            this.part = null;
+        }
     }
 
     void renderPart(Trans3 t) {
