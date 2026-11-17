@@ -36,7 +36,11 @@ import cpw.mods.fml.common.eventhandler.*;
 import cpw.mods.fml.common.registry.*;
 import cpw.mods.fml.relauncher.*;
 
-@Mod(modid = Info.MODID, name = Info.MODNAME, version = Info.VERSION)
+@Mod(
+        modid = Info.MODID,
+        name = Info.MODNAME,
+        version = Info.VERSION,
+        dependencies = "required-after:ForgeMultipart@[2.0.0,)")
 
 public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
