@@ -450,6 +450,14 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         return list;
     }
 
+    // Empty panel of the same material and size; controls are not copied.
+    @Override
+    public ItemStack pickItem(MovingObjectPosition hit) {
+        ItemStack stack = base.newStack();
+        stack.getTagCompound().setInteger("gridSize", gridSize);
+        return stack;
+    }
+
     ItemStack stackForControl(int i) {
         ItemStack stack = null;
         NBTTagCompound nbt = null;
