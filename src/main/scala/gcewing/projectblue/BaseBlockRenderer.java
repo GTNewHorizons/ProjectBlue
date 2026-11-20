@@ -84,7 +84,11 @@ public class BaseBlockRenderer<BLOCK extends Block> implements ISimpleBlockRende
         tess = Tessellator.instance;
         tess.setColorOpaque_F(1, 1, 1);
         Trans3 t = localToGlobalTransformation();
-        return renderBlock(t);
+        try {
+            return renderBlock(t);
+        } finally {
+            this.world = null;
+        }
     }
 
     Trans3 localToInventoryTransformation(int metadata) {
