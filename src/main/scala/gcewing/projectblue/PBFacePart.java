@@ -19,7 +19,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import codechicken.lib.data.*;
 import codechicken.lib.vec.*;
-import codechicken.multipart.MultiPartRegistry.IPartFactory;
+import codechicken.multipart.MultiPartRegistry.IPartFactory2;
 import cpw.mods.fml.relauncher.*;
 
 public abstract class PBFacePart extends JCuboidFacePart {
@@ -127,7 +127,7 @@ public abstract class PBFacePart extends JCuboidFacePart {
 
     // ------------------------------------------------------------------------------------------------
 
-    public static class Factory implements IPartFactory {
+    public static class Factory implements IPartFactory2 {
 
         String type;
         Class<? extends PBFacePart> cls;
@@ -137,7 +137,19 @@ public abstract class PBFacePart extends JCuboidFacePart {
             this.cls = cls;
         }
 
-        public PBFacePart createPart(String name, boolean client) {
+        @Override
+        public PBFacePart createPart(String name, NBTTagCompound nbt) {
+            return createPart(0, 0);
+        }
+
+        @Override
+        public PBFacePart createPart(String name, MCDataInput packet) {
+            return createPart(0, 0);
+        }
+
+        // The legacy IPartFactory adapter also served previews.
+        @Override
+        public PBFacePart createPartForClientPreview(String name, NBTTagCompound nbt) {
             return createPart(0, 0);
         }
 

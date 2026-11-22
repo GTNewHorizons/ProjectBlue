@@ -29,14 +29,18 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
 import codechicken.multipart.MultiPartRegistry;
-import codechicken.multipart.MultiPartRegistry.IPartFactory;
+import codechicken.multipart.MultiPartRegistry.IPartFactory2;
 import cpw.mods.fml.common.*;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.eventhandler.*;
 import cpw.mods.fml.common.registry.*;
 import cpw.mods.fml.relauncher.*;
 
-@Mod(modid = Info.MODID, name = Info.MODNAME, version = Info.VERSION)
+@Mod(
+        modid = Info.MODID,
+        name = Info.MODNAME,
+        version = Info.VERSION,
+        dependencies = "required-after:ForgeMultipart@[2.0.0,)")
 
 public class ProjectBlue extends BaseMod<ProjectBlueClient> {
 
@@ -142,8 +146,8 @@ public class ProjectBlue extends BaseMod<ProjectBlueClient> {
         // addContainer(PBGui.PneumaticExtractor, PneumaticExtractorContainer.class);
     }
 
-    public static void addMultiPart(IPartFactory factory, String... types) {
-        MultiPartRegistry.registerParts(factory, types);
+    public static void addMultiPart(IPartFactory2 factory, String... types) {
+        MultiPartRegistry.registerPartFactory(factory, types);
     }
 
     void addFacePart(Class<? extends PBFacePart> cls, String name) {

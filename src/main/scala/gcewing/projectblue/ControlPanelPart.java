@@ -26,7 +26,7 @@ import codechicken.lib.lighting.*;
 import codechicken.lib.vec.*;
 import codechicken.microblock.*;
 import codechicken.multipart.*;
-import codechicken.multipart.MultiPartRegistry.IPartFactory;
+import codechicken.multipart.MultiPartRegistry.IPartFactory2;
 import mrtjp.projectred.*;
 import mrtjp.projectred.api.*;
 import mrtjp.projectred.core.*;
@@ -450,6 +450,14 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
         return list;
     }
 
+    // Empty panel of the same material and size; controls are not copied.
+    @Override
+    public ItemStack pickItem(MovingObjectPosition hit) {
+        ItemStack stack = base.newStack();
+        stack.getTagCompound().setInteger("gridSize", gridSize);
+        return stack;
+    }
+
     ItemStack stackForControl(int i) {
         ItemStack stack = null;
         NBTTagCompound nbt = null;
@@ -629,10 +637,21 @@ public class ControlPanelPart extends PBFacePart /* JCuboidFacePart */
 
     // ------------------------------------------------------------------------------------------------
 
-    public static class Factory implements IPartFactory {
+    public static class Factory implements IPartFactory2 {
 
-        public TMultiPart createPart(String name, boolean client) {
-            // System.out.printf("ControlPanelPart.Factory.createPart: Created %s\n", part);
+        @Override
+        public TMultiPart createPart(String name, NBTTagCompound nbt) {
+            return new ControlPanelPart();
+        }
+
+        @Override
+        public TMultiPart createPart(String name, MCDataInput packet) {
+            return new ControlPanelPart();
+        }
+
+        // The legacy IPartFactory adapter also served previews.
+        @Override
+        public TMultiPart createPartForClientPreview(String name, NBTTagCompound nbt) {
             return new ControlPanelPart();
         }
 
